@@ -136,6 +136,10 @@ export async function createUpdateInfoTasks(event: ArtifactCreated, _publishConf
       }
     }
 
+    if (publishConfiguration.stagingPercentage != null) {
+      info.stagingPercentage = publishConfiguration.stagingPercentage
+    }
+
     for (const channel of computeChannelNames(packager, publishConfiguration)) {
       if (isMac && isElectronUpdater1xCompatibility && event.file.endsWith(".zip")) {
         // write only for first channel (generateUpdatesFilesForAllChannels is a new functionality, no need to generate old mac update info file)
@@ -166,6 +170,7 @@ async function createUpdateInfo(version: string, event: ArtifactCreated, release
   const customUpdateInfo = event.updateInfo
   const url = path.basename(event.file!)
   const sha512 = (customUpdateInfo == null ? null : customUpdateInfo.sha512) || await hashFile(event.file!)
+  const stagingPercentage = (event.stagingPercentage == null ? 100 : event.stagingPercentage)
   const files = [{url, sha512}]
   const result: UpdateInfo = {
     // @ts-ignore
@@ -176,6 +181,8 @@ async function createUpdateInfo(version: string, event: ArtifactCreated, release
     path: url /* backward compatibility, electron-updater 1.x - electron-updater 2.15.0 */,
     // @ts-ignore
     sha512 /* backward compatibility, electron-updater 1.x - electron-updater 2.15.0 */,
+    // @ts-ignore
+    stagingPercentage,
     ...releaseInfo as UpdateInfo,
   }
 
